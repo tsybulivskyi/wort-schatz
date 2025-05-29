@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:wort_schatz/domain/word.dart';
 import '../flip_card.dart';
 
 class WordList extends StatelessWidget {
-  const WordList({super.key, required List<Map<String, dynamic>> texts})
-    : _texts = texts;
+  const WordList({super.key, required List<Word> texts}) : _texts = texts;
 
-  final List<Map<String, dynamic>> _texts;
+  final List<Word> _texts;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class WordList extends StatelessWidget {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          item['original'] ?? '',
+                          item.original ?? '',
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -56,7 +56,7 @@ class WordList extends StatelessWidget {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          'Translation: ${item['translation']}',
+                          'Translation: ${item.translation}',
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w500,
@@ -90,7 +90,7 @@ class WordList extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item['original'] ?? '',
+                          item.original ?? '',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,

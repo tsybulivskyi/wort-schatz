@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:wort_schatz/components/wordList.dart';
-import 'package:path/path.dart' show join;
-import 'package:sqflite/sqflite.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:wort_schatz/domain/word.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,54 +61,60 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Database? _database;
-  List<Map<String, dynamic>> _texts = [];
+  List<Word> _words = [];
 
   @override
   void initState() {
     super.initState();
-    _initDb();
+    _fetchWords();
   }
 
-  Future<void> _initDb() async {
-    final dbPath = await getDatabasesPath();
-    _database = await openDatabase(
-      join(dbPath, 'user_texts.db'),
-      onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE texts(id INTEGER PRIMARY KEY, original NVARCHAR(255), translation NVARCHAR(255))',
-        );
-      },
-      onOpen: (db) {
-        db.execute('DROP TABLE IF EXISTS texts');
-        return db.execute(
-          'CREATE TABLE texts(id INTEGER PRIMARY KEY, original NVARCHAR(255), translation NVARCHAR(255))',
-        );
-        // return db.execute('DELETE FROM texts');
-      },
-      version: 3,
-    );
-    await _fetchTexts();
+  Future<void> _fetchWords() async {
+    try {
+      final res = await http.get(Uri.parse('http://192.168.178.22:8080/words'));
+      if (res.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(res.body);
+        final List<Word> words =
+            data.map((wordData) => Word.fromJson(wordData)).toList();
+        setState(() {
+          _words = words;
+        });
+      } else {
+        // Handle error or fallback
+        setState(() {
+          _words = [];
+        });
+      }
+    } catch (e) {
+      // Handle error (e.g., show a snackbar or log)
+      setState(() {
+        _words = [];
+      });
+    }
   }
 
-  Future<void> _fetchTexts() async {
-    if (_database == null) return;
-    final texts = await _database!.query('texts', orderBy: 'id DESC');
-    setState(() {
-      _texts = texts;
-    });
+  Future<void> _saveWord(String original, String translation) async {
+    // Call the backend endpoint to POST /words
+    try {
+      // Placeholder for HTTP POST request
+      // Example: Use http.post(Uri.parse('http://localhost:8080/words'), ...)
+      // Uncomment and add http package to pubspec.yaml if needed:
+      final res = await http.post(
+        Uri.parse('http://10.0.2.2:8080/words'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'original': original, 'translation': translation}),
+      );
+      if (res.statusCode != HttpStatus.created) {
+        throw Exception('Failed to save word to backend');
+      }
+    } catch (e) {
+      // Handle error (e.g., show a snackbar or log)
+    }
+
+    await _fetchWords();
   }
 
-  Future<void> _saveText(String original, String translation) async {
-    if (_database == null) return;
-    await _database!.insert('texts', {
-      'original': original,
-      'translation': translation,
-    });
-    await _fetchTexts();
-  }
-
-  Future<void> _saveTextDialog() async {
+  Future<void> _saveWordDialog() async {
     String original = '';
     String translation = '';
     await showDialog(
@@ -140,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () async {
                 if (original.trim().isNotEmpty &&
                     translation.trim().isNotEmpty) {
-                  await _saveText(original, translation);
+                  await _saveWord(original, translation);
                 }
                 Navigator.of(dialogContext).pop();
               },
@@ -150,6 +160,22 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       },
     );
+  }
+
+  Future<void> _deleteAllWords() async {
+    try {
+      final res = await http.delete(
+        Uri.parse('http://192.168.178.22:8080/words'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (res.statusCode != HttpStatus.noContent &&
+          res.statusCode != HttpStatus.ok) {
+        throw Exception('Failed to delete words');
+      }
+    } catch (e) {
+      // Handle error (e.g., show a snackbar or log)
+    }
+    await _fetchWords();
   }
 
   @override
@@ -166,6 +192,15 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         centerTitle: true, // Add this line to center the title horizontally
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            tooltip: 'Delete All Words',
+            onPressed: () async {
+              await _deleteAllWords();
+            },
+          ),
+        ],
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -188,13 +223,13 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             const SizedBox(height: 24),
             const Text('Deine Worte:'),
-            WordList(texts: _texts),
+            WordList(texts: _words),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _saveTextDialog();
+          _saveWordDialog();
         },
         tooltip: 'Add Text',
         child: const Icon(Icons.add),

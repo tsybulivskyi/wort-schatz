@@ -1,22 +1,18 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'word.g.dart';
+
+@JsonSerializable()
 class Word {
-  final String id;
-  final String original;
-  final String translation;
-  final List<Tag> tags;
-  final DateTime createdAt;
+  int ID;
+  String original;
+  String translation;
+  List<String> tags;
+  DateTime CreatedAt;
 
-  const Word({
-    required this.id,
-    required this.original,
-    required this.translation,
-    required this.tags,
-    required this.createdAt,
-  });
-}
+  Word(this.ID, this.original, this.translation, this.tags, this.CreatedAt);
 
-class Tag {
-  final String id;
-  final String name;
+  factory Word.fromJson(Map<String, dynamic> json) => _$WordFromJson(json);
 
-  Tag({required this.id, required this.name});
+  Map<String, dynamic> toJson() => _$WordToJson(this);
 }
