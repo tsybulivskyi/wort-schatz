@@ -190,17 +190,51 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        centerTitle: true, // Add this line to center the title horizontally
+        centerTitle: true,
         title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_forever),
-            tooltip: 'Delete All Words',
-            onPressed: () async {
-              await _deleteAllWords();
-            },
-          ),
-        ],
+        // The hamburger menu is shown automatically if a drawer is present
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.deepPurple),
+              child: Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.format_list_numbered),
+              title: Text('Word count: ${_words.length}'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.label),
+              title: const Text('Tags'),
+              onTap: () {
+                Navigator.of(context).pop();
+                // You can add navigation logic here
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_forever, color: Colors.red),
+              title: const Text(
+                'Delete All Words',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () async {
+                Navigator.of(context).pop(); // Close the drawer
+                await _deleteAllWords();
+              },
+            ),
+            // Add more menu items here
+          ],
+        ),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
