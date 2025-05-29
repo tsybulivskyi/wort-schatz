@@ -4,15 +4,12 @@ part 'word.g.dart';
 
 @JsonSerializable()
 class Word {
-  int ID;
+  int id;
   String original;
   String translation;
   List<String> tags;
-  DateTime CreatedAt;
 
-  Word(this.ID, this.original, this.translation, this.tags, this.CreatedAt);
-
+  Word(this.id, this.original, this.translation, this.tags);
   factory Word.fromJson(Map<String, dynamic> json) => _$WordFromJson(json);
-
   Map<String, dynamic> toJson() => _$WordToJson(this);
 }
