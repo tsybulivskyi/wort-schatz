@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:wort_schatz/components/wordList.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:wort_schatz/domain/word.dart';
+import 'package:wort_schatz/config.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   runApp(const MyApp());
 }
 
@@ -71,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _fetchWords() async {
     try {
-      final res = await http.get(Uri.parse('http://192.168.178.22:8080/words'));
+      final res = await http.get(Uri.parse('${AppConfig.baseUrl}/words'));
       if (res.statusCode == 200) {
         final List<dynamic> data = jsonDecode(res.body);
         final List<Word> words =
@@ -96,11 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _saveWord(String original, String translation) async {
     // Call the backend endpoint to POST /words
     try {
-      // Placeholder for HTTP POST request
-      // Example: Use http.post(Uri.parse('http://localhost:8080/words'), ...)
-      // Uncomment and add http package to pubspec.yaml if needed:
       final res = await http.post(
-        Uri.parse('http://10.0.2.2:8080/words'),
+        Uri.parse('${AppConfig.baseUrl}/words'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'original': original, 'translation': translation}),
       );
@@ -165,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _deleteAllWords() async {
     try {
       final res = await http.delete(
-        Uri.parse('http://192.168.178.22:8080/words'),
+        Uri.parse('${AppConfig.baseUrl}/words'),
         headers: {'Content-Type': 'application/json'},
       );
       if (res.statusCode != HttpStatus.noContent &&
