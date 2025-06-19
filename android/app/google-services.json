@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "477208877005",
+    "project_id": "wort-schatz-f60d0",
+    "storage_bucket": "wort-schatz-f60d0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477208877005:android:918ac9b9d5df85e0351684",
+        "android_client_info": {
+          "package_name": "com.example.neui_flutter_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDn8jZh0MZtqKRTT9i__o8ZgWdMr4K4ccc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
